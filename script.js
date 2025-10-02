@@ -100,8 +100,144 @@ function closeCart(){ cartEl.classList.remove('open'); }
 $('#open-cart').addEventListener('click', openCart);
 $('#close-cart').addEventListener('click', closeCart);
 $('#clear-cart').addEventListener('click', clearCart);
-$('#checkout').addEventListener('click', () => {
-  alert('Demo only. Hook this to your payment gateway later. The cart state is saved in your browser.');
+
+const checkoutModal = $('#checkout-modal');
+const checkoutForm = $('#checkout-form');
+const checkoutMessage = $('#checkout-message');
+const summarySection = $('#checkout-summary');
+const summaryItems = $('#summary-items');
+const summaryTotal = $('#summary-total');
+const copyOrderBtn = $('#copy-order');
+const complaintSelect = $('#complaint-status');
+const minecraftInput = $('#minecraft-name');
+const discordInput = $('#discord-name');
+let lastOrderDetails = '';
+
+const htmlEscape = str => str.replace(/[&<>"']/g, ch => ({
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+}[ch] || ch));
+
+function openCheckoutModal(){
+  const items = getCart();
+  if(!items.length){
+    alert('Your cart is empty. Add a key before checking out.');
+    return;
+  }
+  closeCart();
+  checkoutForm.reset();
+  checkoutMessage.textContent = '';
+  summarySection.hidden = true;
+  summaryItems.innerHTML = '';
+  summaryTotal.textContent = '';
+  lastOrderDetails = '';
+  checkoutModal.classList.add('open');
+  checkoutModal.setAttribute('aria-hidden', 'false');
+  setTimeout(()=>minecraftInput.focus(), 150);
+}
+
+function closeCheckoutModal(){
+  checkoutModal.classList.remove('open');
+  checkoutModal.setAttribute('aria-hidden', 'true');
+}
+
+$('#checkout').addEventListener('click', openCheckoutModal);
+$('#close-modal').addEventListener('click', closeCheckoutModal);
+checkoutModal.addEventListener('click', e => {
+  if(e.target === checkoutModal) closeCheckoutModal();
+});
+
+const statusLabels = {
+  'no-issue': 'No complaints, ready to pay',
+  'submitted': 'I already opened a ticket',
+  'need-help': 'I still need help before paying'
+};
+
+checkoutForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const items = getCart();
+  if(!items.length){
+    checkoutMessage.textContent = 'Your cart is empty. Add items before checking out.';
+    return;
+  }
+  const minecraft = minecraftInput.value.trim();
+  const discord = discordInput.value.trim();
+  const complaint = complaintSelect.value;
+  if(!minecraft || !discord || !complaint){
+    checkoutMessage.textContent = 'Please fill in all fields to continue.';
+    return;
+  }
+  if(complaint === 'need-help'){
+    checkoutMessage.textContent = 'Open a support ticket in Discord so staff can help you before paying.';
+    summarySection.hidden = true;
+    return;
+  }
+
+  checkoutMessage.textContent = '';
+  summaryItems.innerHTML = '';
+
+  const details = [];
+  const addSummaryItem = (label, value) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<strong>${label}:</strong> ${htmlEscape(value)}`;
+    summaryItems.appendChild(li);
+  };
+
+  addSummaryItem('Minecraft', minecraft);
+  addSummaryItem('Discord', discord);
+  addSummaryItem('Ticket status', statusLabels[complaint] || complaint);
+
+  const itemsHeader = document.createElement('li');
+  itemsHeader.innerHTML = '<strong>Items</strong>';
+  summaryItems.appendChild(itemsHeader);
+
+  let total = 0;
+  items.forEach(item => {
+    const lineTotal = item.price * item.qty;
+    total += lineTotal;
+    const li = document.createElement('li');
+    li.innerHTML = `${htmlEscape(item.name)} × ${item.qty} — <strong>${fmt(lineTotal)}</strong>`;
+    summaryItems.appendChild(li);
+    details.push(`${item.name} x${item.qty} - ${fmt(lineTotal)}`);
+  });
+
+  summaryTotal.textContent = fmt(total);
+  summarySection.hidden = false;
+
+  lastOrderDetails = [
+    `Minecraft: ${minecraft}`,
+    `Discord: ${discord}`,
+    `Ticket status: ${statusLabels[complaint] || complaint}`,
+    'Items:',
+    ...details,
+    `Total: ${fmt(total)}`
+  ].join('\n');
+});
+
+if(copyOrderBtn){
+  copyOrderBtn.addEventListener('click', () => {
+    if(!lastOrderDetails){
+      checkoutMessage.textContent = 'Submit the form above to generate order details.';
+      return;
+    }
+    navigator.clipboard.writeText(lastOrderDetails).then(() => {
+      const original = copyOrderBtn.textContent;
+      copyOrderBtn.textContent = 'Copied!';
+      setTimeout(() => { copyOrderBtn.textContent = original; }, 1800);
+    });
+  });
+}
+
+window.addEventListener('keydown', e => {
+  if(e.key !== 'Escape') return;
+  if(checkoutModal.classList.contains('open')){
+    closeCheckoutModal();
+  } else {
+    closeCart();
+  }
 });
 
 // IP copy
@@ -119,7 +255,4 @@ $('#copy-ip-hero').addEventListener('click', copyIP);
 bindProducts();
 renderCart();
 refreshBadge();
-
-// Close cart on ESC
-window.addEventListener('keydown', e=>{ if(e.key==='Escape') closeCart(); });
 
