@@ -164,7 +164,50 @@
     </div>
   </aside>
 
-  
+  <!-- Checkout modal -->
+  <div id="checkout-modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-panel">
+      <button type="button" class="modal-close" id="close-modal" aria-label="Close">✕</button>
+      <h3>Complete Your Order</h3>
+      <p class="modal-lead">
+        Before paying, please make sure you have opened a complaint/support ticket if you faced any issues.
+        We also need your in-game details so staff can deliver your keys quickly after payment.
+      </p>
+      <form id="checkout-form" class="modal-form">
+        <label class="field">
+          <span>Minecraft Username</span>
+          <input type="text" id="minecraft-name" name="minecraft" autocomplete="username" placeholder="Ex: Notch" required />
+        </label>
+        <label class="field">
+          <span>Discord Username</span>
+          <input type="text" id="discord-name" name="discord" autocomplete="off" placeholder="Ex: Player#1234" required />
+        </label>
+        <label class="field">
+          <span>Complaint / Ticket Status</span>
+          <select id="complaint-status" name="complaint" required>
+            <option value="" disabled selected>Select an option</option>
+            <option value="no-issue">No complaints, I'm ready to pay.</option>
+            <option value="submitted">I already opened a ticket about an issue.</option>
+            <option value="need-help">I still need help before paying.</option>
+          </select>
+        </label>
+        <p id="checkout-message" class="modal-message" role="alert" aria-live="polite"></p>
+        <button type="submit" class="btn btn-wide">Review Order &amp; Pay</button>
+      </form>
+      <section id="checkout-summary" class="modal-summary" hidden>
+        <h4>Order Summary</h4>
+        <ul id="summary-items"></ul>
+        <p class="summary-total">Total: <span id="summary-total"></span></p>
+        <p class="summary-note">
+          Copy the order details and share them in your Discord ticket. Our team will process the payment with you and deliver the keys manually after confirming your Minecraft and Discord names.
+        </p>
+        <div class="summary-actions">
+          <button type="button" class="btn btn-ghost" id="copy-order">Copy Order Details</button>
+          <a class="btn" href="https://discord.gg/nQRNkPc8y" target="_blank" rel="noopener">Open Discord Ticket</a>
+        </div>
+      </section>
+    </div>
+  </div>
 
   <script src="assets/panel.js"></script>
   <script src="script.js"></script>
