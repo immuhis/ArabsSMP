@@ -132,6 +132,48 @@ body {
   overflow-x:hidden;
 }
 
+body.lang-ar {
+  font-family:'Cairo', Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+body.lang-ar .nav {
+  direction:ltr;
+}
+
+body.lang-ar .nav > * {
+  direction:rtl;
+}
+
+body.lang-ar .language-toggle {
+  direction:ltr;
+  letter-spacing:0;
+}
+
+body.lang-ar .support {
+  text-align:right;
+}
+
+body.lang-ar .hero-content,
+body.lang-ar .feature-card,
+body.lang-ar .section-heading,
+body.lang-ar .support-details,
+body.lang-ar .hero-note,
+body.lang-ar .cart,
+body.lang-ar .cart-foot,
+body.lang-ar .modal-panel,
+body.lang-ar .modal-summary,
+body.lang-ar .modal-form {
+  text-align:right;
+}
+
+body.lang-ar .hero-steps li {
+  flex-direction:row-reverse;
+}
+
+body.lang-ar .cart-item {
+  direction:rtl;
+}
+
 body::before,
 body::after {
   content:"";
@@ -373,6 +415,18 @@ section { position:relative; }
 
 .theme-toggle-spin .theme-icon {
   transform:rotate(180deg) scale(0.9);
+}
+
+.language-toggle {
+  min-width:48px;
+  font-weight:700;
+  letter-spacing:0.8px;
+}
+
+.language-toggle-text {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 }
 
 .btn-glow {
