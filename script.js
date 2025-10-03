@@ -251,8 +251,46 @@ function copyIP(){
 $('#copy-ip').addEventListener('click', copyIP);
 $('#copy-ip-hero').addEventListener('click', copyIP);
 
+function initRevealAnimations(){
+  const elements = $$('.reveal');
+  const revealNow = el => {
+    if(el.dataset.delay){
+      el.style.setProperty('--reveal-delay', el.dataset.delay);
+    }
+    el.classList.add('is-visible');
+  };
+
+  if(!('IntersectionObserver' in window)){
+    elements.forEach(revealNow);
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if(!entry.isIntersecting) return;
+      const target = entry.target;
+      if(target.dataset.delay){
+        target.style.setProperty('--reveal-delay', target.dataset.delay);
+      }
+      target.classList.add('is-visible');
+      obs.unobserve(target);
+    });
+  }, {
+    threshold:0.15,
+    rootMargin:'0px 0px -60px 0px'
+  });
+
+  elements.forEach(el => {
+    if(el.dataset.delay){
+      el.style.setProperty('--reveal-delay', el.dataset.delay);
+    }
+    observer.observe(el);
+  });
+}
+
 // Init
 bindProducts();
 renderCart();
 refreshBadge();
+initRevealAnimations();
 
