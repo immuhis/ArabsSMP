@@ -23,7 +23,11 @@
         <span class="logo">🔑</span>
         <h1>ArabSMP</h1>
       </div>
-      <nav class="nav">
+      <button class="menu-toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+        <span class="menu-icon" aria-hidden="true"></span>
+        <span class="sr-only">Toggle navigation</span>
+      </button>
+      <nav class="nav" id="primary-nav">
         <a class="btn btn-discord" href="https://discord.gg/nQRNkPc8y" target="_blank" rel="noopener">Join Discord</a>
         <button id="copy-ip" class="btn btn-ghost" aria-label="Copy server IP">Copy IP</button>
         <button id="theme-toggle" class="btn btn-ghost theme-toggle" type="button" aria-pressed="true" aria-label="Switch to light mode">
