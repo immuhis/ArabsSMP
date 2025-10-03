@@ -272,28 +272,7 @@ i18n.registerString('checkout.totalLabel', 'Total:', { preload: true });
 const themeToggle = $('#theme-toggle');
 const menuToggle = $('#menu-toggle');
 const primaryNav = $('#primary-nav');
-const languageToggle = $('#language-toggle');
-const languageToggleText = languageToggle ? $('.language-toggle-text', languageToggle) : null;
 
-const PRODUCT_NAME_KEYS = {
-  'key-green': 'products.common.name',
-  'key-blue': 'products.prime.name',
-  'key-gold': 'products.gold.name',
-  'key-red': 'products.crimson.name',
-  'key-purple': 'products.amethyst.name'
-};
-
-function updateLanguageToggleUI(lang){
-  if(!languageToggle) return;
-  const nextLang = lang === 'ar' ? 'en' : 'ar';
-  if(languageToggleText){
-    languageToggleText.textContent = nextLang.toUpperCase();
-  }
-  const labelKey = nextLang === 'ar' ? 'nav.languageSwitchAr' : 'nav.languageSwitchEn';
-  const fallback = nextLang === 'ar' ? 'Switch to Arabic' : 'Switch to English';
-  languageToggle.setAttribute('aria-label', i18n.instant(labelKey, fallback));
-  languageToggle.setAttribute('aria-pressed', lang === 'ar' ? 'true' : 'false');
-}
 
 if(menuToggle && primaryNav){
   document.body.classList.add('menu-enhanced');
@@ -301,8 +280,7 @@ if(menuToggle && primaryNav){
     primaryNav.classList.remove('is-open');
     menuToggle.classList.remove('is-active');
     menuToggle.setAttribute('aria-expanded', 'false');
-  };
-
+    
   menuToggle.addEventListener('click', () => {
     const isOpen = !primaryNav.classList.contains('is-open');
     primaryNav.classList.toggle('is-open', isOpen);
@@ -318,26 +296,6 @@ if(menuToggle && primaryNav){
   mq.addEventListener('change', e => { if(e.matches) closeMenu(); });
 
   closeMenu();
-}
-
-if(languageToggle){
-  languageToggle.addEventListener('click', async () => {
-    const nextLang = i18n.language === 'ar' ? 'en' : 'ar';
-    languageToggle.disabled = true;
-    try {
-      await i18n.setLanguage(nextLang);
-    } finally {
-      languageToggle.disabled = false;
-    }
-  });
-}
-
-i18n.onChange(lang => {
-  updateLanguageToggleUI(lang);
-  renderCart();
-  const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
-  applyTheme(currentTheme, { persist:false, animate:false });
-});
 
 function applyTheme(theme, { persist = true, animate = true } = {}){
   const next = theme === 'light' ? 'light' : 'dark';
