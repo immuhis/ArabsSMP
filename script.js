@@ -1,10 +1,89 @@
 // Utility: localStorage cart
 const CART_KEY = 'blucifer_cart_v2';
+const THEME_KEY = 'arabsmp_theme';
 
 const $ = (sel, ctx=document) => ctx.querySelector(sel);
 const $$ = (sel, ctx=document) => [...ctx.querySelectorAll(sel)];
 
 const fmt = n => '$' + (Math.round(n * 100) / 100).toFixed(2);
+
+const themeToggle = $('#theme-toggle');
+
+function readStoredTheme(){
+  try {
+    return localStorage.getItem(THEME_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredTheme(value){
+  try {
+    localStorage.setItem(THEME_KEY, value);
+  } catch {
+    /* storage unavailable */
+  }
+}
+
+function applyTheme(theme, { persist = true, animate = true } = {}){
+  const next = theme === 'light' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  if(themeToggle){
+    const icon = $('.theme-icon', themeToggle);
+    const text = $('.theme-text', themeToggle);
+    if(next === 'dark'){
+      themeToggle.setAttribute('aria-label', 'Switch to light mode');
+      themeToggle.setAttribute('aria-pressed', 'true');
+      if(icon) icon.textContent = '🌙';
+      if(text) text.textContent = 'Dark';
+    } else {
+      themeToggle.setAttribute('aria-label', 'Switch to dark mode');
+      themeToggle.setAttribute('aria-pressed', 'false');
+      if(icon) icon.textContent = '☀️';
+      if(text) text.textContent = 'Light';
+    }
+    if(animate){
+      themeToggle.classList.remove('theme-toggle-spin');
+      void themeToggle.offsetWidth;
+      themeToggle.classList.add('theme-toggle-spin');
+      setTimeout(() => themeToggle.classList.remove('theme-toggle-spin'), 400);
+    }
+  }
+  if(persist){
+    writeStoredTheme(next);
+  }
+}
+
+function initTheme(){
+  const stored = readStoredTheme();
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(stored){
+    applyTheme(stored, { animate:false });
+  } else {
+    applyTheme(prefersDark ? 'dark' : 'light', { persist:false, animate:false });
+    if(window.matchMedia){
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      const syncSystemTheme = e => {
+        if(!readStoredTheme()){
+          applyTheme(e.matches ? 'dark' : 'light', { persist:false });
+        }
+      };
+      if(typeof mq.addEventListener === 'function'){
+        mq.addEventListener('change', syncSystemTheme);
+      } else if(typeof mq.addListener === 'function'){
+        mq.addListener(syncSystemTheme);
+      }
+    }
+  }
+
+  if(themeToggle){
+    themeToggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+    });
+  }
+}
 
 function getCart(){
   try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
@@ -26,6 +105,7 @@ function addToCart(item){
   else { items.push(item); }
   saveCart(items);
   renderCart();
+  animateCart();
 }
 
 function removeFromCart(id){
@@ -58,8 +138,8 @@ function renderCart(){
       <img src="${i.img}" alt="${i.name}" />
       <div>
         <div class="name">${i.name}</div>
-        <div class="meta">${fmt(i.price)} × 
-          <input type="number" min="1" value="${i.qty}" style="width:60px;background:#0000;color:#fff;border:1px solid #ffffff33;border-radius:8px;padding:4px 6px" />
+        <div class="meta">${fmt(i.price)} ×
+          <input type="number" min="1" value="${i.qty}" class="qty-input" />
         </div>
       </div>
       <div style="display:grid;gap:6px;justify-items:end">
@@ -86,9 +166,24 @@ function bindProducts(){
     const img = card.dataset.img;
     const qtySel = $('.qty', card);
     $('.add', card).addEventListener('click', () => {
+      card.classList.remove('card-added');
+      void card.offsetWidth;
+      card.classList.add('card-added');
+      setTimeout(() => card.classList.remove('card-added'), 500);
       addToCart({ id, name, price, img, qty: parseInt(qtySel.value, 10) });
       openCart();
     });
+  });
+}
+
+function animateCart(){
+  const btn = $('#open-cart');
+  const badge = $('#cart-count');
+  [btn, badge].forEach(el => {
+    if(!el) return;
+    el.classList.remove('cart-bump');
+    void el.offsetWidth;
+    el.classList.add('cart-bump');
   });
 }
 
@@ -293,4 +388,5 @@ bindProducts();
 renderCart();
 refreshBadge();
 initRevealAnimations();
+initTheme();
 
