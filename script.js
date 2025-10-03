@@ -8,6 +8,33 @@ const $$ = (sel, ctx=document) => [...ctx.querySelectorAll(sel)];
 const fmt = n => '$' + (Math.round(n * 100) / 100).toFixed(2);
 
 const themeToggle = $('#theme-toggle');
+const menuToggle = $('#menu-toggle');
+const primaryNav = $('#primary-nav');
+
+if(menuToggle && primaryNav){
+  document.body.classList.add('menu-enhanced');
+  const closeMenu = () => {
+    primaryNav.classList.remove('is-open');
+    menuToggle.classList.remove('is-active');
+    menuToggle.setAttribute('aria-expanded', 'false');
+  };
+
+  menuToggle.addEventListener('click', () => {
+    const isOpen = !primaryNav.classList.contains('is-open');
+    primaryNav.classList.toggle('is-open', isOpen);
+    menuToggle.classList.toggle('is-active', isOpen);
+    menuToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+
+  $$('#primary-nav a, #primary-nav button').forEach(el => {
+    el.addEventListener('click', () => closeMenu());
+  });
+
+  const mq = window.matchMedia('(min-width: 768px)');
+  mq.addEventListener('change', e => { if(e.matches) closeMenu(); });
+
+  closeMenu();
+}
 
 function applyTheme(theme, { persist = true, animate = true } = {}){
   const next = theme === 'light' ? 'light' : 'dark';
